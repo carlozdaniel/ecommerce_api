@@ -1,10 +1,17 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: "api/v1/users/sessions" }
+  devise_for :users, skip: [ :sessions, :passwords, :confirmations, :unlocks ], controllers: {
+    registrations: "api/v1/users/registrations",
+    sessions: "api/v1/users/sessions"
+  }
 
-  # Health check route
-  get "up" => "rails/health#show", as: :rails_health_check
+  devise_scope :user do
+    post "api/v1/users", to: "api/v1/users/registrations#create", as: :api_v1_user_registration
+    post "api/v1/users/sign_in", to: "api/v1/users/sessions#create", as: :api_v1_user_session
+    delete "api/v1/users/sign_out", to: "api/v1/users/sessions#destroy", as: :destroy_api_v1_user_session
+  end
 
-  # Namespace for API routes
+  get "up", to: "rails/health#show", as: :rails_health_check
+
   namespace :api do
     namespace :v1 do
       resources :products, only: [ :index, :show, :create, :update, :destroy ]

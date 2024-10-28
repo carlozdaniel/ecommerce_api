@@ -99,6 +99,7 @@ Devise.setup do |config|
   # passing skip: :sessions to `devise_for` in your config/routes.rb
   config.skip_session_storage = [ :http_auth ]
 
+
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX
   # requests for sign in and sign up, you need to get a new CSRF token
@@ -306,7 +307,14 @@ Devise.setup do |config|
   config.responder.redirect_status = :see_other
 
   config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.devise[:jwt_secret_key]
+    jwt.secret = Rails.application.credentials.secret_key_base
+    jwt.dispatch_requests = [
+      [ "POST", %r{^/api/v1/users/sign_in$} ]
+    ]
+    jwt.revocation_requests = [
+      [ "DELETE", %r{^/api/v1/users/sign_out$} ]
+    ]
+    jwt.expiration_time = 24.hours.to_i
   end
 
   # ==> Configuration for :registerable

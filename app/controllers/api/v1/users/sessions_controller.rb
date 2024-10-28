@@ -1,3 +1,4 @@
+# app/controllers/api/v1/users/sessions_controller.rb
 module Api
   module V1
     module Users
@@ -7,20 +8,12 @@ module Api
         private
 
         def respond_with(resource, _opts = {})
-          render json: { message: "Logged in successfully.", user: current_user }, status: :ok
+          token = Warden::JWTAuth::UserEncoder.new.call(resource, :user, nil) # Genera el token JWT
+          render json: { message: "Logged in successfully.", user: resource, token: token[0] }, status: :ok
         end
 
         def respond_to_on_destroy
-          jwt_payload = JWT.decode(request.headers["Authorization"].split(" ").last,
-                                   Rails.application.credentials.dig(:devise, :jwt_secret_key)).first
-          current_user = User.find(jwt_payload["sub"])
-          if current_user
-            render json: { message: "Logged out successfully." }, status: :ok
-          else
-            render json: { message: "User has no active session." }, status: :unauthorized
-          end
-        rescue JWT::DecodeError, ActiveRecord::RecordNotFound
-          render json: { error: "Invalid token or user not found." }, status: :unauthorized
+          head :no_content
         end
       end
     end
