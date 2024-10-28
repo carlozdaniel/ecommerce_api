@@ -2,9 +2,10 @@ class CreateOrders < ActiveRecord::Migration[7.2]
   def change
     create_table :orders do |t|
       t.references :user, null: false, foreign_key: true
-      t.references :product, null: false, foreign_key: true
-      t.integer :quantity
-      t.decimal :total_price
+      t.decimal :total_price, precision: 10, scale: 2, default: 0.0
+      t.string :status, default: 'pending'
+      t.string :shipping_address
+      t.string :payment_status, default: 'unpaid'
 
       t.timestamps
     end
