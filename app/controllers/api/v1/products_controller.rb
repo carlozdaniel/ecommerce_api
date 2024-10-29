@@ -34,6 +34,12 @@ class Api::V1::ProductsController < ApplicationController
     end
   end
 
+  # Acción para obtener los productos más vendidos
+  def most_sold
+    most_sold_products = Product.most_sold
+    render json: most_sold_products, each_serializer: ProductSerializer
+  end
+
   private
 
   def product
