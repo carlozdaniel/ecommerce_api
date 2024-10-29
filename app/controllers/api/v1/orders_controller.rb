@@ -13,20 +13,10 @@ class Api::V1::OrdersController < ApplicationController
   def create
     order = current_user.orders.build(order_params)
 
-    order.order_items.each do |item|
-      product = Product.find(item.product_id)
-      if product.stock < item.quantity
-        render json: { error: "Insufficient stock for #{product.name}" }, status: :unprocessable_entity and return
-      end
-      product.update(stock: product.stock - item.quantity)
-      item.price = product.price
-      item.subtotal = item.price * item.quantity
-    end
-
     if order.save
       render json: order, serializer: OrderSerializer, status: :created
     else
-      render json: order.errors, status: :unprocessable_entity
+      render json: { error: order.errors.full_messages.join(", ") }, status: :unprocessable_entity
     end
   end
 
@@ -52,7 +42,23 @@ class Api::V1::OrdersController < ApplicationController
     current_user.orders.find(params[:id])
   end
 
+  def product(id)
+    Product.find_by(id: id)
+  end
+
+  def assign_product_item
+    params[:order][:order_items_attributes].each do |item|
+      found_product = product(item[:product_id])
+      if found_product
+        item[:price] = found_product.price
+        item[:subtotal] = found_product.price * item[:quantity]
+      end
+    end
+  end
+
   def order_params
-    params.require(:order).permit(:shipping_address, order_items_attributes: %i[product_id quantity price])
+    assign_product_item
+    params.require(:order).permit(:shipping_address, order_items_attributes: %i[id product_id quantity price subtotal])
+    .merge(user: current_user)
   end
 end

@@ -1,4 +1,5 @@
 class Api::V1::ProductsController < ApplicationController
+  before_action :authenticate_user!, only:  %i[ create update destroy ]
   def index
     render json: Product.all, each_serializer: ProductSerializer
   end
@@ -39,5 +40,6 @@ class Api::V1::ProductsController < ApplicationController
 
   def product_params
     params.require(:product).permit(:name, :description, :price, :stock)
+    .merge(user: current_user)
   end
 end

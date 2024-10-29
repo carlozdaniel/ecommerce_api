@@ -38,6 +38,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_28_092822) do
   end
 
   create_table "products", force: :cascade do |t|
+    t.bigint "user_id", null: false
     t.string "name"
     t.text "description"
     t.decimal "price"
@@ -45,6 +46,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_28_092822) do
     t.boolean "in_stock", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_products_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -62,4 +64,5 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_28_092822) do
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "users"
+  add_foreign_key "products", "users"
 end
