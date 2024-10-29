@@ -14,8 +14,12 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :products, only: [ :index, :show, :create, :update, :destroy ]
-      resources :orders, only: [ :index, :show, :create ]
+      resources :products, only: %i[ index show create update destroy ]
+      resources :orders, only: %i[ index show create destroy ] do
+        member do
+          patch :mark_as_paid
+        end
+      end
     end
   end
 end

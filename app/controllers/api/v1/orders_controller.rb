@@ -1,8 +1,9 @@
 class Api::V1::OrdersController < ApplicationController
-  before_action :set_order, only: [ :show, :destroy ]
+  before_action :authenticate_user!
+  before_action :order, only: %i[ show destroy mark_as_paid ]
 
   def index
-    render json: Order.all, each_serializer: OrderSerializer, status: :ok
+    render json: current_user.orders.all, each_serializer: OrderSerializer, status: :ok
   end
 
   def show
@@ -10,7 +11,18 @@ class Api::V1::OrdersController < ApplicationController
   end
 
   def create
-    order = Order.build(order_params)
+    order = current_user.orders.build(order_params)
+
+    order.order_items.each do |item|
+      product = Product.find(item.product_id)
+      if product.stock < item.quantity
+        render json: { error: "Insufficient stock for #{product.name}" }, status: :unprocessable_entity and return
+      end
+      product.update(stock: product.stock - item.quantity)
+      item.price = product.price
+      item.subtotal = item.price * item.quantity
+    end
+
     if order.save
       render json: order, serializer: OrderSerializer, status: :created
     else
@@ -19,17 +31,25 @@ class Api::V1::OrdersController < ApplicationController
   end
 
   def destroy
-    if @order.destroy
+    if order.destroy
       render json: { message: "Order deleted successfully" }, status: :ok
     else
       render json: { error: "Failed to delete the order" }, status: :unprocessable_entity
     end
   end
 
+  def mark_as_paid
+    if order.update(status: "paid", payment_status: "paid")
+      render json: { message: "Order marked as paid successfully" }, status: :ok
+    else
+      render json: { error: "Failed to update order status" }, status: :unprocessable_entity
+    end
+  end
+
   private
 
-  def set_order
-    Order.find(params[:id])
+  def order
+    current_user.orders.find(params[:id])
   end
 
   def order_params
