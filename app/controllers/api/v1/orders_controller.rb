@@ -47,8 +47,6 @@ class Api::V1::OrdersController < ApplicationController
   end
 
   def assign_product_item
-    p params[:order]
-    p "=============="
     params[:order][:order_items_attributes].each do |item|
       found_product = product(item[:product_id])
       if found_product
