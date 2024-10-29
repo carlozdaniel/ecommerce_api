@@ -1,3 +1,4 @@
+# app/controllers/api/v1/products_controller.rb
 class Api::V1::ProductsController < ApplicationController
   before_action :authenticate_user!, only:  %i[ create update destroy ]
   def index
@@ -12,7 +13,8 @@ class Api::V1::ProductsController < ApplicationController
     product = Product.new(product_params)
 
     if product.save
-      render json: product, serializer: ProductSerializer
+      render json: product, serializer: ProductSerializer, status: :created
+
     else
       render json: product.errors, status: :unprocessable_entity
     end
