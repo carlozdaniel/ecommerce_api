@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  use_doorkeeper
   devise_for :users, skip: [ :sessions, :passwords, :confirmations, :unlocks ], controllers: {
     registrations: "api/v1/users/registrations",
     sessions: "api/v1/users/sessions"

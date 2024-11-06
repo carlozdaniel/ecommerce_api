@@ -6,7 +6,15 @@ RSpec.describe Product, type: :model do
   let(:product) { create(:product, stock: 10, user: user) }
 
   describe 'associations' do
-    it { is_expected.to belong_to(:user) }
+    it 'belongs to a user when user is present' do
+      expect(product.user).to eq(user)
+    end
+
+    it 'allows user to be optional for client_credentials' do
+      product_without_user = Product.new(name: 'Test Product', price: 50, stock: 10)
+      expect(product_without_user).to be_valid
+    end
+
     it { is_expected.to have_many(:order_items) }
   end
 
