@@ -105,6 +105,8 @@ GEM
       devise (~> 4.0)
       warden-jwt_auth (~> 0.10)
     diff-lcs (1.5.1)
+    doorkeeper (5.8.0)
+      railties (>= 5)
     drb (2.2.1)
     dry-auto_inject (1.0.1)
       dry-core (~> 1.0)
@@ -337,6 +339,7 @@ DEPENDENCIES
   debug
   devise
   devise-jwt
+  doorkeeper
   factory_bot_rails
   faker
   kaminari

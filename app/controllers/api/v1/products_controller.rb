@@ -1,6 +1,6 @@
 # app/controllers/api/v1/products_controller.rb
 class Api::V1::ProductsController < ApplicationController
-  before_action :authenticate_user!, only:  %i[ create update destroy ]
+  before_action :authenticate_user_or_doorkeeper!
   def index
     render json: Product.all, each_serializer: ProductSerializer
   end
@@ -16,7 +16,7 @@ class Api::V1::ProductsController < ApplicationController
       render json: product, serializer: ProductSerializer, status: :created
 
     else
-      render json: product.errors, status: :unprocessable_entity
+      render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -24,17 +24,18 @@ class Api::V1::ProductsController < ApplicationController
     if product.update(product_params)
       render json: product, serializer: ProductSerializer
     else
-      render json: product.errors, status: :unprocessable_entity
+      render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
     if product.destroy
-      render status: :ok
+      render json: { message: "Product deleted successfully" }, status: :ok
+    else
+      render json: { error: "Failed to delete product" }, status: :unprocessable_entity
     end
   end
 
-  # Acción para obtener los productos más vendidos
   def most_sold
     most_sold_products = Product.most_sold
     render json: most_sold_products, each_serializer: ProductSerializer
@@ -43,11 +44,12 @@ class Api::V1::ProductsController < ApplicationController
   private
 
   def product
-    Product.find(params[:id])
+    @product ||= Product.find(params[:id])
   end
 
   def product_params
-    params.require(:product).permit(:name, :description, :price, :stock)
-    .merge(user: current_user)
+    permitted_params = params.require(:product).permit(:name, :description, :price, :stock)
+    permitted_params[:user] = current_user if current_user.present?
+    permitted_params
   end
 end

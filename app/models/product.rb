@@ -1,7 +1,7 @@
 # app/models/product.rb
 class Product < ApplicationRecord
   has_many :order_items
-  belongs_to :user
+  belongs_to :user, optional: -> { Doorkeeper.configuration.client_credentials }
 
   validates :name, presence: true
   validates :price, presence: true, numericality: { greater_than: 0 }
@@ -9,7 +9,6 @@ class Product < ApplicationRecord
 
   before_save :update_in_stock_status
 
-  # Método para obtener los productos más vendidos (recomendación sencilla)
   def self.most_sold(limit = 5)
     joins(:order_items)
       .group("products.id")

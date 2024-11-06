@@ -30,6 +30,7 @@ gem "kaminari"
 gem "active_model_serializers"
 gem "rack-cors"
 gem "recombee_api_client"
+gem "doorkeeper"
 
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
